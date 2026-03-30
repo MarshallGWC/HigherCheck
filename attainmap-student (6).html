@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attainmap — My Prelim Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --green:#1a7a42;--green-light:#dcf5e8;--green-mid:#2a9a55;
+  --amber:#b45309;--amber-light:#fef3c7;
+  --red:#c53030;--red-light:#fff0f0;
+  --ink:#1a1f36;--ink-mid:#4a5568;--ink-light:#8896a5;
+  --bg:#f0f4f8;--surface:#fff;--surface-2:#f7fafc;
+  --border:#e2e8f0;--border-mid:#cbd5e0;
+  --radius:10px;--radius-sm:6px;--radius-lg:16px;
+  --shadow:0 4px 12px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 10px 30px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.06);
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --subject:#1a7a42;--subject-light:#dcf5e8;--subject-mid:#2a9a55;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.6;}
+
+/* HEADER */
+.header{background:var(--surface);border-bottom:2px solid var(--border-mid);padding:0 1.5rem;display:flex;align-items:center;gap:1rem;height:52px;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.logo{display:flex;align-items:center;gap:0.5rem;text-decoration:none;}
+.logo-text{font-size:1.1rem;font-weight:800;color:var(--subject);letter-spacing:-0.02em;}
+.header-sub{font-size:0.78rem;color:var(--ink-light);margin-left:auto;}
+
+/* MAIN */
+.main{max-width:780px;margin:0 auto;padding:2rem 1.25rem;}
+
+/* CARDS */
+.card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;margin-bottom:1.5rem;}
+.card-header{background:var(--subject);color:white;padding:1.25rem 1.5rem;}
+.card-header h1{font-size:1.2rem;font-weight:700;margin-bottom:0.15rem;}
+.card-header p{font-size:0.78rem;opacity:0.8;}
+.card-body{padding:1.5rem;}
+
+/* NAME STEP */
+.name-step{text-align:center;padding:2.5rem 1.5rem;}
+.name-step h2{font-size:1.4rem;font-weight:700;margin-bottom:0.5rem;}
+.name-step p{color:var(--ink-mid);margin-bottom:1.5rem;font-size:0.9rem;}
+.name-input{width:100%;max-width:320px;padding:0.75rem 1rem;border:2px solid var(--border-mid);border-radius:var(--radius);font-size:1rem;font-family:var(--font);outline:none;text-align:center;transition:border-color 0.15s;}
+.name-input:focus{border-color:var(--subject);}
+.btn-start{margin-top:1rem;padding:0.75rem 2rem;background:var(--subject);color:white;border:none;border-radius:var(--radius);font-size:0.95rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:all 0.15s;}
+.btn-start:hover{background:var(--green-mid);transform:translateY(-1px);box-shadow:var(--shadow);}
+
+/* MARKS ENTRY */
+.section-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-light);font-family:var(--mono);font-weight:600;margin-bottom:0.75rem;}
+.questions-grid{display:flex;flex-direction:column;gap:0;}
+.q-row{display:grid;grid-template-columns:72px 1fr 90px;align-items:center;gap:0.75rem;padding:0.55rem 0;border-bottom:1px solid var(--border);}
+.q-row:last-child{border-bottom:none;}
+.q-label{font-family:var(--mono);font-size:0.78rem;font-weight:600;color:var(--ink);}
+.q-spec-cell{display:flex;flex-direction:column;gap:0.1rem;min-width:0;}
+.q-spec{font-family:var(--mono);font-size:0.7rem;font-weight:600;color:var(--subject);}
+.q-spec-desc{font-size:0.72rem;color:var(--ink-mid);line-height:1.3;}
+.q-entry{display:flex;align-items:center;gap:0.4rem;justify-content:flex-end;}
+.q-input{width:52px;padding:0.3rem 0.4rem;border:1.5px solid var(--border-mid);border-radius:var(--radius-sm);font-size:0.88rem;font-family:var(--mono);font-weight:600;text-align:center;outline:none;transition:border-color 0.15s;}
+.q-input:focus{border-color:var(--subject);}
+.q-input.over{border-color:var(--red);background:var(--red-light);}
+.q-max{font-size:0.7rem;color:var(--ink-light);font-family:var(--mono);white-space:nowrap;}
+
+.progress-bar-wrap{background:var(--border);border-radius:100px;height:6px;margin:1rem 0;}
+.progress-bar-fill{height:6px;border-radius:100px;background:var(--subject);transition:width 0.3s;}
+
+.totals-row{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1rem;background:var(--surface-2);border-radius:var(--radius);margin-top:1rem;}
+.total-score{font-size:1.4rem;font-weight:800;font-family:var(--mono);color:var(--subject);}
+.total-pct{font-size:0.85rem;color:var(--ink-mid);}
+
+.btn-report{width:100%;margin-top:1.25rem;padding:0.85rem;background:var(--subject);color:white;border:none;border-radius:var(--radius);font-size:1rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:0.5rem;}
+.btn-report:hover{background:var(--green-mid);}
+.btn-report:disabled{background:var(--border-mid);cursor:not-allowed;}
+
+/* REPORT */
+.result-banner{background:var(--subject);color:white;padding:1.5rem;display:flex;justify-content:space-between;align-items:flex-start;}
+.result-name{font-size:1.3rem;font-weight:700;margin-bottom:0.2rem;}
+.result-meta{font-size:0.78rem;opacity:0.75;}
+.result-pct{font-size:2.8rem;font-weight:300;line-height:1;font-family:var(--font);}
+.result-marks{font-size:0.72rem;opacity:0.7;text-align:right;}
+.grade-badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:100px;font-size:0.75rem;font-weight:700;margin-top:0.4rem;}
+.badge-pass{background:rgba(255,255,255,0.25);color:white;}
+.badge-border{background:rgba(255,200,0,0.3);color:#fff8dc;}
+.badge-below{background:rgba(255,100,100,0.3);color:#ffe8e8;}
+
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border);}
+.summary-cell{padding:1rem 1.25rem;text-align:center;border-right:1px solid var(--border);}
+.summary-cell:last-child{border-right:none;}
+.summary-num{font-size:1.8rem;font-weight:300;line-height:1;margin-bottom:0.2rem;}
+.summary-label{font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-light);font-family:var(--mono);}
+
+.charts-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
+.chart-cell{padding:1.25rem;min-width:0;}
+.chart-cell:first-child{border-right:1px solid var(--border);}
+.chart-cell canvas{max-height:220px!important;width:100%!important;}
+.chart-title{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-light);font-family:var(--mono);margin-bottom:0.75rem;}
+
+/* TOPIC BARS */
+.topic-bar-row{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;}
+.topic-bar-label{font-size:0.72rem;color:var(--ink-mid);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topic-bar-track{flex:1;height:8px;background:var(--border);border-radius:100px;overflow:hidden;}
+.topic-bar-fill{height:8px;border-radius:100px;transition:width 0.6s ease;}
+.topic-bar-pct{font-size:0.7rem;font-family:var(--mono);font-weight:600;width:32px;text-align:right;flex-shrink:0;}
+
+/* ACCORDION */
+.acc-section{border-bottom:1px solid var(--border);}
+.acc-header{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.25rem;cursor:pointer;background:white;transition:background 0.15s;user-select:none;}
+.acc-header:hover{background:var(--surface-2);}
+.acc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.acc-dot.green{background:var(--green);}
+.acc-dot.amber{background:var(--amber);}
+.acc-dot.red{background:var(--red);}
+.acc-title{flex:1;}
+.acc-title-top{display:flex;align-items:baseline;gap:0.5rem;}
+.acc-code{font-family:var(--mono);font-size:0.68rem;font-weight:600;color:var(--ink-light);}
+.acc-name{font-size:0.88rem;font-weight:600;}
+.acc-bar-row{margin-top:0.3rem;height:4px;background:var(--border);border-radius:100px;overflow:hidden;}
+.acc-bar-fill{height:4px;border-radius:100px;}
+.acc-bar-fill.green{background:var(--green);}
+.acc-bar-fill.amber{background:var(--amber);}
+.acc-bar-fill.red{background:var(--red);}
+.acc-pct{font-family:var(--mono);font-size:1rem;font-weight:700;text-align:right;flex-shrink:0;margin-right:0.5rem;}
+.acc-pct.green{color:var(--green);}
+.acc-pct.amber{color:var(--amber);}
+.acc-pct.red{color:var(--red);}
+.acc-status{font-size:0.62rem;padding:0.1rem 0.45rem;border-radius:100px;font-family:var(--mono);}
+.acc-status.green{background:var(--green-light);color:var(--green);}
+.acc-status.amber{background:var(--amber-light);color:var(--amber);}
+.acc-status.red{background:var(--red-light);color:var(--red);}
+.acc-chevron{width:14px;height:14px;stroke:var(--ink-light);fill:none;stroke-width:2.5;flex-shrink:0;transition:transform 0.2s;}
+.acc-body{display:none;}
+.acc-body.open{display:block;}
+
+.outcome-row{display:grid;grid-template-columns:1fr auto;align-items:flex-start;gap:0.75rem;padding:0.7rem 1rem 0.7rem 2.5rem;border-top:1px solid rgba(0,0,0,0.05);}
+.outcome-code{font-family:var(--mono);font-size:0.66rem;font-weight:600;color:var(--ink-light);margin-bottom:0.1rem;}
+.outcome-desc{font-size:0.8rem;color:var(--ink);}
+.outcome-score{font-family:var(--mono);font-size:0.82rem;font-weight:700;text-align:right;flex-shrink:0;}
+.outcome-frac{font-size:0.62rem;color:var(--ink-light);font-family:var(--mono);}
+
+/* PAST PAPER PILLS */
+.pp-section{padding:0.6rem 1rem 0.75rem 2.5rem;border-top:1px solid rgba(0,0,0,0.04);background:var(--surface-2);}
+.pp-label{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;}
+.pp-label-text{font-size:0.72rem;font-weight:600;color:var(--subject);}
+.pp-pills{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.pp-pill{display:inline-flex;align-items:stretch;border:1.5px solid var(--subject);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07);}
+.pp-pill a{display:inline-flex;align-items:center;gap:0.4rem;padding:0.3rem 0.65rem;font-size:0.76rem;font-weight:600;font-family:var(--font);text-decoration:none;transition:all 0.15s;}
+.pp-pill a.qp{background:var(--subject-light);color:var(--subject);border-right:1.5px solid var(--subject);}
+.pp-pill a.qp:hover{background:var(--subject);color:white;}
+.pp-pill a.ms{background:white;color:var(--ink-mid);}
+.pp-pill a.ms:hover{background:#f0fdf4;color:var(--green);}
+.pp-none{font-size:0.72rem;color:var(--ink-light);font-style:italic;}
+
+/* RESOURCES FOOTER */
+.resources-footer{padding:0.85rem 1.5rem;background:var(--surface-2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;}
+.res-links{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.res-link{font-size:0.72rem;color:var(--subject);text-decoration:none;display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.55rem;border:1.5px solid var(--subject);border-radius:6px;background:white;font-weight:600;transition:all 0.15s;}
+.res-link:hover{background:var(--subject-light);}
+.res-link.dim{color:var(--ink-mid);border-color:var(--border-mid);}
+.res-link.dim:hover{background:var(--surface-2);}
+
+.btn-print{padding:0.5rem 1.1rem;background:var(--green);color:white;border:none;border-radius:var(--radius);font-size:0.78rem;font-weight:700;font-family:var(--font);cursor:pointer;display:inline-flex;align-items:center;gap:0.4rem;}
+.btn-print:hover{background:var(--green-mid);}
+
+.btn-retake{width:100%;padding:0.6rem;background:white;color:var(--subject);border:1.5px solid var(--subject);border-radius:var(--radius);font-size:0.85rem;font-weight:600;font-family:var(--font);cursor:pointer;margin-top:1rem;transition:all 0.15s;}
+.btn-retake:hover{background:var(--subject-light);}
+
+@media(max-width:560px){
+  .charts-row{grid-template-columns:1fr;}
+  .chart-cell:first-child{border-right:none;border-bottom:1px solid var(--border);}
+  .summary-grid{grid-template-columns:repeat(3,1fr);}
+  .result-pct{font-size:2rem;}
+  .topic-bar-label{width:90px;font-size:0.65rem;}
+}
+
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  .header,.btn-retake,.btn-report,.btn-print-wrap,
+  .acc-chevron,[onclick*="toggleAcc"],[onclick*="expandAll"],[onclick*="collapseAll"],
+  div[style*="expand"]{display:none!important;}
+  .main{padding:0!important;max-width:100%!important;}
+  body{background:white!important;font-size:9pt!important;}
+  @page{margin:1cm;size:A4;}
+
+  /* Force all accordions open */
+  .acc-body{display:block!important;}
+
+  /* Tighten card */
+  .card{box-shadow:none!important;border:1px solid #ddd!important;margin-bottom:0!important;}
+
+  /* Slim banner */
+  .result-banner{padding:0.6rem 1rem!important;}
+  .result-name{font-size:11pt!important;}
+  .result-pct{font-size:18pt!important;}
+  .result-meta,.result-marks{font-size:7pt!important;}
+  .grade-badge{font-size:7pt!important;padding:0.1rem 0.4rem!important;}
+
+  /* Summary row */
+  .summary-cell{padding:0.4rem 0.5rem!important;}
+  .summary-num{font-size:14pt!important;}
+  .summary-label{font-size:6pt!important;}
+
+  /* Charts row — shrink and side by side */
+  .charts-row{grid-template-columns:180px 1fr!important;}
+  .chart-cell{padding:0.5rem 0.75rem!important;}
+  .chart-cell canvas{max-height:140px!important;}
+  .chart-title{font-size:6pt!important;margin-bottom:0.3rem!important;}
+  .topic-bar-row{margin-bottom:0.2rem!important;}
+  .topic-bar-label{font-size:6.5pt!important;width:100px!important;}
+  .topic-bar-track{height:5px!important;}
+  .topic-bar-fill{height:5px!important;}
+  .topic-bar-pct{font-size:6.5pt!important;}
+
+  /* Instruction bar — hide */
+  #acc-instruction-bar{display:none!important;}
+
+  /* Accordion headers */
+  .acc-header{padding:0.35rem 0.75rem!important;}
+  .acc-name{font-size:8pt!important;}
+  .acc-code{font-size:6.5pt!important;}
+  .acc-pct{font-size:8pt!important;}
+  .acc-status{font-size:6pt!important;padding:0.05rem 0.3rem!important;}
+  .acc-bar-row{margin-top:0.15rem!important;height:3px!important;}
+  .acc-dot{width:6px!important;height:6px!important;}
+
+  /* Outcome rows */
+  .outcome-row{padding:0.3rem 0.5rem 0.3rem 1.5rem!important;gap:0.5rem!important;}
+  .outcome-code{font-size:6pt!important;}
+  .outcome-desc{font-size:7.5pt!important;line-height:1.2!important;}
+  .outcome-score{font-size:7.5pt!important;}
+  .outcome-frac{font-size:6pt!important;}
+
+  /* Past paper pills */
+  .pp-section{padding:0.25rem 0.5rem 0.35rem 1.5rem!important;}
+  .pp-label{margin-bottom:0.25rem!important;}
+  .pp-label-text{font-size:7pt!important;}
+  .pp-pills{gap:0.3rem!important;}
+  .pp-pill a{padding:0.15rem 0.4rem!important;font-size:7pt!important;}
+  .pp-none{font-size:6.5pt!important;}
+
+  /* Resources footer */
+  .resources-footer{padding:0.5rem 0.75rem!important;}
+  .res-link{font-size:7pt!important;padding:0.1rem 0.35rem!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="6" width="22" height="18" rx="2" fill="#f0f4f8" stroke="#1a7a42" stroke-width="1.5"/>
+      <rect x="5" y="2" width="4" height="8" rx="1" fill="#1a7a42"/>
+      <rect x="11" y="3" width="4" height="7" rx="1" fill="#2a9a55"/>
+      <rect x="17" y="4" width="4" height="6" rx="1" fill="#4ab870"/>
+    </svg>
+    <span class="logo-text">Attainmap</span>
+  </div>
+  <span class="header-sub">Higher Engineering Science · Prelim Revision</span>
+</div>
+
+<div class="main" id="app"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const QUESTIONS = [
+  { label:'Q1(a)(i)',  max:1, spec:'CS 11.1'   },
+  { label:'Q1(a)(ii)', max:1, spec:'CS 11.1'   },
+  { label:'Q1(b)',     max:2, spec:'CS 11.1'   },
+  { label:'Q2',        max:3, spec:'CS 10.3.1' },
+  { label:'Q3(a)',     max:3, spec:'CS 5.1'    },
+  { label:'Q3(b)(i)',  max:2, spec:'CS 6.2'    },
+  { label:'Q3(b)(ii)', max:2, spec:'CS 6.2'    },
+  { label:'Q3(c)',     max:4, spec:'CS 6.5'    },
+  { label:'Q3(d)',     max:4, spec:'CS 6.9.4'  },
+  { label:'Q3(e)',     max:5, spec:'CS 2.5'    },
+  { label:'Q4(a)',     max:9, spec:'CS 7.2.2'  },
+  { label:'Q4(b)',     max:5, spec:'CS 10.1'   },
+  { label:'Q4(c)',     max:3, spec:'CS 7.1.3'  },
+  { label:'Q4(d)',     max:3, spec:'CS 7.1.2'  },
+  { label:'Q5(a)',     max:3, spec:'CS 10.1'   },
+  { label:'Q5(b)',     max:5, spec:'CS 10.1'   },
+  { label:'Q6(a)',     max:3, spec:'CS 1.3'    },
+  { label:'Q6(b)',     max:2, spec:'CS 1.4'    },
+  { label:'Q6(c)',     max:2, spec:'CS 1.3'    },
+  { label:'Q6(d)',     max:3, spec:'CS 1.3'    },
+  { label:'Q6(e)',     max:2, spec:'CS 6.6'    },
+  { label:'Q7(a)',     max:6, spec:'CS 10.4'   },
+  { label:'Q7(c)',     max:2, spec:'CS 4.2'    },
+  { label:'Q8(a)',     max:4, spec:'CS 2.5'    },
+  { label:'Q8(b)(i)',  max:3, spec:'CS 10.4'   },
+  { label:'Q8(b)(ii)', max:3, spec:'CS 11.5'   },
+  { label:'Q8(c)',     max:5, spec:'CS 2.5'    },
+  { label:'Q9(a)',     max:7, spec:'CS 9.1'    },
+  { label:'Q9(b)',     max:2, spec:'CS 9.1'    },
+  { label:'Q9(c)',     max:3, spec:'CS 6.5'    },
+  { label:'Q9(d)',     max:1, spec:'CS 6.5'    },
+  { label:'Q9(e)',     max:2, spec:'CS 6.2'    },
+  { label:'Q9(f)',     max:3, spec:'CS 6.7'    },
+  { label:'Q9(g)',     max:2, spec:'CS 6.7'    },
+];
+
+const SPEC = {
+  "CS1":  { label:"Systems & Control", outcomes: { "CS 1.1":"Complex system, sub-system, and control diagrams", "CS 1.2":"Role of negative feedback in a system", "CS 1.3":"Closed-loop, two-state, and proportional feedback", "CS 1.4":"Using error detection in a closed-loop system" } },
+  "CS2":  { label:"Energy", outcomes: { "CS 2.1":"Calculations related to energy audits: inputs", "CS 2.2":"Calculations related to energy audits: outputs", "CS 2.3":"Calculations related to energy audits: energy losses", "CS 2.4":"Calculations related to energy audits: efficiency", "CS 2.5":"Applied calculations using Ew=Fd, P=E/t, Ek=½mv², Ep=mgh, Ee=VIt, Eh=cmΔT", "CS 2.6":"Efficiency calculations η = Eout/Ein = Pout/Pin" } },
+  "CS3":  { label:"Mathematics for Engineering", outcomes: { "CS 3.1":"Manipulating and combining given formulae to obtain answers", "CS 3.2":"Solving structural problems using trigonometric functions and simultaneous equations", "CS 3.3":"Use of Engineering Science Data Booklet for Higher" } },
+  "CS4":  { label:"Engineers & Society", outcomes: { "CS 4.1":"Role of the professional engineer within a project, including communication and team working", "CS 4.2":"Skills and specialist knowledge required within projects" } },
+  "CS5":  { label:"Social, Economic & Environmental Impact", outcomes: { "CS 5.1":"Examples of social and economic impacts (positive and negative) of engineering", "CS 5.2":"Examples of environmental impacts (positive and negative) of engineering", "CS 5.3":"Sustainability of engineering solutions", "CS 5.4":"Emerging technologies and their impact" } },
+  "CS6":  { label:"Electronic Systems", outcomes: { "CS 6.1":"Variable resistors, light and temperature sensors in voltage dividers", "CS 6.2":"Using input transducer characteristics to design voltage dividers", "CS 6.3":"Function and purpose of BJTs", "CS 6.4":"Designing a BJT circuit as a current amplifier", "CS 6.5":"Calculating current gain (hFE) of an npn transistor", "CS 6.6":"Function and purpose of MOSFETs", "CS 6.7":"Designing a MOSFET (n-channel enhancement mode) circuit as a voltage-operated switch", "CS 6.8":"Comparing BJT and MOSFET transistors in a given application", "CS 6.9.1":"Op-amp inverting amplifier – configuration, input/output relationship", "CS 6.9.2":"Op-amp non-inverting amplifier – configuration, input/output relationship", "CS 6.9.3":"Op-amp comparator – purpose and operation", "CS 6.9.4":"Op-amp difference amplifier – configuration, input/output relationship", "CS 6.9.5":"Op-amp summing amplifier – configuration, input/output relationship", "CS 6.9.6":"Op-amp voltage follower (buffer) – purpose and use", "CS 6.9.7":"Calculating input/output voltage relationships for op-amp configurations" } },
+  "CS7":  { label:"Digital Systems & Control", outcomes: { "CS 7.1.1":"Logic functions: AND, OR, NOT, NAND, NOR, XOR (up to 4 inputs)", "CS 7.1.2":"Conversion to NAND equivalent", "CS 7.1.3":"Developing Boolean expressions from truth tables", "CS 7.1.4":"Developing Boolean expressions from logic diagrams", "CS 7.1.5":"Developing Boolean expressions from circuit specifications", "CS 7.1.6":"Constructing truth tables from written specifications", "CS 7.1.7":"Constructing logic diagrams from written specifications", "CS 7.2.1":"Controlling a motor using pulse-width modulation", "CS 7.2.2":"Writing control routines with up to four inputs and four outputs", "CS 7.2.3":"Processing analogue inputs", "CS 7.2.4":"Using infinite and finite loops and time delays", "CS 7.2.5":"Using logic and arithmetic operations to make decisions", "CS 7.2.6":"Using high-level programs to monitor inputs and initiate digital outputs", "CS 7.2.7":"Using high-level programs to make decisions with arithmetic and logic functions" } },
+  "CS8":  { label:"Mechanical Drive Systems", outcomes: { "CS 8.1":"Diagrams of drive systems", "CS 8.2.1":"Selecting and calculating simple and compound gear trains", "CS 8.2.2":"Selecting and calculating belt drives and chain drives", "CS 8.2.3":"Selecting and calculating rack and pinion", "CS 8.2.4":"Selecting and calculating worm and wheel", "CS 8.2.5":"Selecting and calculating worm and nut", "CS 8.3":"Purpose of couplings, radial and thrust bearings", "CS 8.4":"Purpose of friction in brakes and clutches", "CS 8.5":"Calculating torque T = Fr", "CS 8.6":"Calculating power in a drive system P = 2πnT" } },
+  "CS9":  { label:"Pneumatic Systems", outcomes: { "CS 9.1":"Sequential control circuits, with up to three cylinders", "CS 9.2":"Electro-pneumatic control circuits" } },
+  "CS10": { label:"Structures", outcomes: { "CS 10.1":"Equilibrium of concurrent and non-concurrent forces in 2D", "CS 10.2":"Resolving triangle/polygon of forces, resultant/equilibrant", "CS 10.3.1":"Calculating reaction forces: loads not exclusively horizontal or vertical", "CS 10.3.2":"Calculating reaction forces: hinge and roller supports", "CS 10.3.3":"Calculating reaction forces: uniformly distributed loads", "CS 10.4":"Using nodal analysis to calculate forces in frames", "CS 10.5":"Diagrams of structures" } },
+  "CS11": { label:"Properties of Materials", outcomes: { "CS 11.1":"Stress/strain (load/extension) graphs", "CS 11.2.1":"Properties: brittleness", "CS 11.2.2":"Properties: elasticity", "CS 11.2.3":"Properties: ductility", "CS 11.2.4":"Properties: plasticity", "CS 11.2.5":"Properties: strength", "CS 11.2.6":"Properties: malleability", "CS 11.3":"Using strain gauges", "CS 11.4":"Calculating Young's Modulus of elasticity", "CS 11.5":"Calculating factor of safety", "CS 11.6":"Calculating elastic strain energy Es = ½Fx" } }
+};
+
+const PAPER_BANK = [
+  { year:'2025', ref:'Q1',         spec:'CS 7.1.2' }, { year:'2025', ref:'Q2(a)',      spec:'CS 6.9.7' },
+  { year:'2025', ref:'Q2(b)',      spec:'CS 6.9.1' }, { year:'2025', ref:'Q2(c)',      spec:'CS 6.9.5' },
+  { year:'2025', ref:'Q3',         spec:'CS 10.3.2'}, { year:'2025', ref:'Q4',         spec:'CS 1.1'   },
+  { year:'2025', ref:'Q5',         spec:'CS 10.1'  }, { year:'2025', ref:'Q6',         spec:'CS 5.1'   },
+  { year:'2025', ref:'Q7(a)',      spec:'CS 11.1'  }, { year:'2025', ref:'Q7(b)',      spec:'CS 10.4'  },
+  { year:'2025', ref:'Q7(c)(i)',   spec:'CS 4.2'   }, { year:'2025', ref:'Q7(c)(ii)',  spec:'CS 4.2'   },
+  { year:'2025', ref:'Q8(a)',      spec:'CS 8.6'   }, { year:'2025', ref:'Q8(b)',      spec:'CS 2.4'   },
+  { year:'2025', ref:'Q8(c)',      spec:'CS 5.1'   }, { year:'2025', ref:'Q8(d)',      spec:'CS 2.5'   },
+  { year:'2025', ref:'Q8(e)',      spec:'CS 8.3'   }, { year:'2025', ref:'Q8(f)',      spec:'CS 6.9.7' },
+  { year:'2025', ref:'Q9(a)',      spec:'CS 6.2'   }, { year:'2025', ref:'Q9(b)(i)',   spec:'CS 6.5'   },
+  { year:'2025', ref:'Q9(b)(ii)',  spec:'CS 6.5'   }, { year:'2025', ref:'Q9(c)',      spec:'CS 6.9.3' },
+  { year:'2025', ref:'Q9(d)',      spec:'CS 6.1'   }, { year:'2025', ref:'Q10(a)',     spec:'CS 7.1.5' },
+  { year:'2025', ref:'Q10(b)',     spec:'CS 7.2.2' }, { year:'2025', ref:'Q11(a)',     spec:'CS 11.5'  },
+  { year:'2025', ref:'Q11(b)(i)', spec:'CS 11.4'  }, { year:'2025', ref:'Q11(b)(ii)',spec:'CS 11.5'  },
+  { year:'2025', ref:'Q11(c)',    spec:'CS 10.3.3'}, { year:'2025', ref:'Q11(d)',     spec:'CS 10.3.3'},
+  { year:'2025', ref:'Q12(a)(i)', spec:'CS 9.1'   }, { year:'2025', ref:'Q12(a)(ii)',spec:'CS 9.1'   },
+  { year:'2025', ref:'Q12(b)',    spec:'CS 6.8'   }, { year:'2025', ref:'Q12(c)',     spec:'CS 6.7'   },
+  { year:'2025', ref:'Q12(d)',    spec:'CS 6.2'   }, { year:'2025', ref:'Q12(e)',     spec:'CS 8.2.3' },
+  { year:'2025', ref:'Q12(f)',    spec:'CS 6.7'   },
+  { year:'2024', ref:'Q1',        spec:'CS 7.1.7' }, { year:'2024', ref:'Q2',        spec:'CS 8.5'   },
+  { year:'2024', ref:'Q3',        spec:'CS 10.3.1'}, { year:'2024', ref:'Q4',        spec:'CS 6.9.7' },
+  { year:'2024', ref:'Q5(a)',     spec:'CS 11.1'  }, { year:'2024', ref:'Q5(b)',     spec:'CS 11.6'  },
+  { year:'2024', ref:'Q5(c)',     spec:'CS 11.2.2'}, { year:'2024', ref:'Q5(d)',     spec:'CS 11.2.1'},
+  { year:'2024', ref:'Q6(a)',     spec:'CS 7.2.3' }, { year:'2024', ref:'Q6(b)',     spec:'CS 7.2.1' },
+  { year:'2024', ref:'Q7(a)',     spec:'CS 9.1'   }, { year:'2024', ref:'Q7(b)(i)',  spec:'CS 5.2'   },
+  { year:'2024', ref:'Q7(b)(ii)', spec:'CS 4.2'   }, { year:'2024', ref:'Q7(c)',     spec:'CS 6.7'   },
+  { year:'2024', ref:'Q7(d)',     spec:'CS 7.2.7' }, { year:'2024', ref:'Q8(a)',     spec:'CS 6.2'   },
+  { year:'2024', ref:'Q8(b)',     spec:'CS 11.3'  }, { year:'2024', ref:'Q8(c)',     spec:'CS 6.5'   },
+  { year:'2024', ref:'Q8(d)',     spec:'CS 6.9.3' }, { year:'2024', ref:'Q8(e)',     spec:'CS 6.9.3' },
+  { year:'2024', ref:'Q8(f)(i)', spec:'CS 6.9.7' }, { year:'2024', ref:'Q8(f)(ii)',spec:'CS 6.9.1' },
+  { year:'2024', ref:'Q9(a)',    spec:'CS 8.6'   }, { year:'2024', ref:'Q9(b)',    spec:'CS 11.5'  },
+  { year:'2024', ref:'Q9(c)',    spec:'CS 2.5'   }, { year:'2024', ref:'Q9(d)',    spec:'CS 11.4'  },
+  { year:'2024', ref:'Q10(a)(i)',spec:'CS 6.2'   }, { year:'2024', ref:'Q10(a)(ii)',spec:'CS 6.5'  },
+  { year:'2024', ref:'Q10(b)',   spec:'CS 1.3'   }, { year:'2024', ref:'Q10(c)',   spec:'CS 6.9.4' },
+  { year:'2024', ref:'Q10(d)',   spec:'CS 1.3'   }, { year:'2024', ref:'Q10(e)',   spec:'CS 10.1'  },
+  { year:'2024', ref:'Q11(a)',   spec:'CS 10.4'  }, { year:'2024', ref:'Q11(b)(i)',spec:'CS 7.1.3' },
+  { year:'2024', ref:'Q11(b)(ii)',spec:'CS 7.1.4'}, { year:'2024', ref:'Q11(b)(iii)',spec:'CS 7.1.2'},
+  { year:'2024', ref:'Q11(c)',   spec:'CS 4.2'   }, { year:'2024', ref:'Q11(d)',   spec:'CS 5.1'   },
+  { year:'2022', ref:'Q1(a)(i)', spec:'CS 11.1'  }, { year:'2022', ref:'Q1(a)(ii)',spec:'CS 11.1'  },
+  { year:'2022', ref:'Q1(b)(i)', spec:'CS 11.4'  }, { year:'2022', ref:'Q1(b)(ii)',spec:'CS 11.2.5'},
+  { year:'2022', ref:'Q2(a)',    spec:'CS 6.9.7' }, { year:'2022', ref:'Q2(b)',    spec:'CS 6.9.1' },
+  { year:'2022', ref:'Q2(c)',    spec:'CS 6.9.1' }, { year:'2022', ref:'Q3',       spec:'CS 10.3.3'},
+  { year:'2022', ref:'Q4(a)',    spec:'CS 7.2.1' }, { year:'2022', ref:'Q4(b)',    spec:'CS 7.2.1' },
+  { year:'2022', ref:'Q4(c)',    spec:'CS 7.2.1' }, { year:'2022', ref:'Q5',       spec:'CS 4.2'   },
+  { year:'2022', ref:'Q6',       spec:'CS 7.1.2' }, { year:'2022', ref:'Q7(a)',    spec:'CS 2.5'   },
+  { year:'2022', ref:'Q7(b)',    spec:'CS 2.4'   }, { year:'2022', ref:'Q7(c)',    spec:'CS 11.5'  },
+  { year:'2022', ref:'Q7(d)',    spec:'CS 5.1'   }, { year:'2022', ref:'Q7(e)',    spec:'CS 5.3'   },
+  { year:'2022', ref:'Q8(a)',    spec:'CS 7.2.3' }, { year:'2022', ref:'Q8(b)',    spec:'CS 7.2.5' },
+  { year:'2022', ref:'Q8(c)(i)',spec:'CS 6.9.4' }, { year:'2022', ref:'Q8(c)(ii)',spec:'CS 6.2'  },
+  { year:'2022', ref:'Q9(a)',    spec:'CS 6.2'   }, { year:'2022', ref:'Q9(b)(i)', spec:'CS 6.4'  },
+  { year:'2022', ref:'Q9(b)(ii)',spec:'CS 6.5'   }, { year:'2022', ref:'Q9(c)',    spec:'CS 1.4'  },
+  { year:'2022', ref:'Q9(d)(i)', spec:'CS 1.3'   }, { year:'2022', ref:'Q9(d)(ii)',spec:'CS 1.3'  },
+  { year:'2022', ref:'Q9(e)(i)', spec:'CS 1.3'   }, { year:'2022', ref:'Q9(e)(ii)',spec:'CS 1.3'  },
+  { year:'2022', ref:'Q10(a)',   spec:'CS 7.1.3' }, { year:'2022', ref:'Q10(b)',   spec:'CS 7.1.7' },
+  { year:'2022', ref:'Q10(c)(i)',spec:'CS 9.1'   }, { year:'2022', ref:'Q10(c)(ii)',spec:'CS 9.2' },
+  { year:'2022', ref:'Q10(d)(i)',spec:'CS 6.7'   }, { year:'2022', ref:'Q10(d)(ii)',spec:'CS 6.7' },
+  { year:'2022', ref:'Q11(a)',   spec:'CS 11.4'  }, { year:'2022', ref:'Q11(b)',   spec:'CS 8.6'  },
+  { year:'2022', ref:'Q11(c)',   spec:'CS 10.1'  }, { year:'2022', ref:'Q12',      spec:'CS 10.4' },
+  { year:'2021', ref:'Q1(a)',    spec:'CS 11.2.2'}, { year:'2021', ref:'Q1(b)',    spec:'CS 11.2.4'},
+  { year:'2021', ref:'Q2',       spec:'CS 6.9.7' }, { year:'2021', ref:'Q3',       spec:'CS 10.3.3'},
+  { year:'2021', ref:'Q4',       spec:'CS 4.2'   }, { year:'2021', ref:'Q5(a)',    spec:'CS 2.5'  },
+  { year:'2021', ref:'Q5(b)',    spec:'CS 6.7'   }, { year:'2021', ref:'Q5(c)',    spec:'CS 6.7'  },
+  { year:'2021', ref:'Q6',       spec:'CS 7.1.2' }, { year:'2021', ref:'Q7(a)',    spec:'CS 7.2.2'},
+  { year:'2021', ref:'Q7(b)',    spec:'CS 7.2.6' }, { year:'2021', ref:'Q8(a)',    spec:'CS 6.9.3'},
+  { year:'2021', ref:'Q8(b)',    spec:'CS 6.9.4' }, { year:'2021', ref:'Q8(c)',    spec:'CS 6.9.7'},
+  { year:'2021', ref:'Q8(d)',    spec:'CS 6.2'   }, { year:'2021', ref:'Q8(e)',    spec:'CS 6.9.7'},
+  { year:'2021', ref:'Q8(f)',    spec:'CS 7.2.3' }, { year:'2021', ref:'Q8(g)',    spec:'CS 7.1.4'},
+  { year:'2021', ref:'Q9(a)',    spec:'CS 6.5'   }, { year:'2021', ref:'Q9(b)',    spec:'CS 6.4'  },
+  { year:'2021', ref:'Q9(c)',    spec:'CS 9.1'   }, { year:'2021', ref:'Q9(d)',    spec:'CS 6.1'  },
+  { year:'2021', ref:'Q9(e)',    spec:'CS 9.2'   }, { year:'2021', ref:'Q9(f)',    spec:'CS 9.2'  },
+  { year:'2021', ref:'Q10(a)(i)',spec:'CS 4.1'   }, { year:'2021', ref:'Q10(a)(ii)',spec:'CS 4.1' },
+  { year:'2021', ref:'Q10(b)(i)',spec:'CS 8.5'   }, { year:'2021', ref:'Q10(b)(ii)',spec:'CS 8.6' },
+  { year:'2021', ref:'Q10(c)(i)',spec:'CS 8.3'   }, { year:'2021', ref:'Q10(c)(ii)',spec:'CS 8.3' },
+  { year:'2021', ref:'Q10(d)',   spec:'CS 2.5'   }, { year:'2021', ref:'Q10(e)',   spec:'CS 10.4' },
+  { year:'2021', ref:'Q11(a)',   spec:'CS 5.1'   }, { year:'2021', ref:'Q11(b)(i)',spec:'CS 10.5' },
+  { year:'2021', ref:'Q11(b)(ii)',spec:'CS 10.3.2'},{ year:'2021', ref:'Q11(c)',  spec:'CS 10.1' },
+  { year:'2021', ref:'Q11(d)(i)',spec:'CS 11.4'  }, { year:'2021', ref:'Q11(d)(ii)',spec:'CS 11.5'},
+];
+
+const AVAILABLE_YEARS = ['2025','2024','2022','2021'];
+
+function getPaperURL(year) {
+  if (year === '2021') return `https://www.sqa.org.uk/files_ccc/NH_Engineering-Science_QP_2021.pdf`;
+  return `https://www.sqa.org.uk/pastpapers/papers/papers/${year}/NH_Engineering-Science_QP_${year}.pdf`;
+}
+function getMSURL(year) {
+  if (year === '2021') return `https://www.sqa.org.uk/sqa/files_ccc/mi_NH_Engineering-Science_mi_2021.pdf`;
+  return `https://www.sqa.org.uk/pastpapers/papers/instructions/${year}/mi_NH_Engineering-Science_mi_${year}.pdf`;
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let studentName = '';
+let marks = QUESTIONS.map(() => '');
+let radarChart = null;
+
+const TOTAL_MARKS = QUESTIONS.reduce((a, q) => a + q.max, 0);
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function normCode(c) { return c.replace(/\s+/g,'').toUpperCase(); }
+
+function getSpecDesc(code) {
+  for (const group of Object.values(SPEC)) {
+    for (const [k, v] of Object.entries(group.outcomes)) {
+      if (normCode(k) === normCode(code)) return v;
+    }
+  }
+  return null;
+}
+
+function buildSpecOptions(currentSpec) {
+  let opts = '';
+  for (const [gk, gd] of Object.entries(SPEC)) {
+    opts += `<optgroup label="${gd.label}">`;
+    for (const [code, desc] of Object.entries(gd.outcomes)) {
+      const sel = normCode(code) === normCode(currentSpec) ? 'selected' : '';
+      opts += `<option value="${code}" ${sel}>${code} — ${desc}</option>`;
+    }
+    opts += '</optgroup>';
+  }
+  return opts;
+}
+
+function toggleSpecEdit(i) {
+  const el = document.getElementById(`spec-edit-${i}`);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function changeSpec(i, newCode) {
+  QUESTIONS[i].spec = newCode;
+  const label = document.getElementById(`spec-label-${i}`);
+  const desc = document.getElementById(`spec-desc-${i}`);
+  const editEl = document.getElementById(`spec-edit-${i}`);
+  if (label) label.textContent = newCode;
+  if (desc) desc.textContent = getSpecDesc(newCode) || '';
+  if (editEl) editEl.style.display = 'none';
+}
+
+function getTopicData() {
+  // Build per-topic earned/possible from marks
+  const topics = {};
+  QUESTIONS.forEach((q, i) => {
+    const csKey = q.spec.match(/^CS\s*\d+/i)?.[0]?.replace(/\s+/,'') || 'CS?';
+    const groupKey = csKey.replace('CS','CS');
+    if (!topics[groupKey]) topics[groupKey] = { earned:0, possible:0 };
+    const v = parseInt(marks[i]) || 0;
+    topics[groupKey].earned += Math.min(v, q.max);
+    topics[groupKey].possible += q.max;
+  });
+  return topics;
+}
+
+function getOutcomeData() {
+  const outcomes = {};
+  QUESTIONS.forEach((q, i) => {
+    const key = q.spec;
+    if (!outcomes[key]) outcomes[key] = { earned:0, possible:0 };
+    const v = parseInt(marks[i]) || 0;
+    outcomes[key].earned += Math.min(v, q.max);
+    outcomes[key].possible += q.max;
+  });
+  return outcomes;
+}
+
+function gradeColor(pct) {
+  if (pct >= 70) return 'green';
+  if (pct >= 50) return 'amber';
+  return 'red';
+}
+
+function specGroupForOutcome(code) {
+  return code.match(/^CS\s*(\d+)/i)?.[0]?.replace(/\s+/,'') || null;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  if (!studentName) {
+    renderName(app);
+  } else {
+    renderMarks(app);
+  }
+}
+
+function renderName(app) {
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <h1>Higher Engineering Science — Prelim</h1>
+        <p>Enter your marks to get your personalised revision plan</p>
+      </div>
+      <div class="name-step">
+        <h2>What's your name?</h2>
+        <p>Your results stay on this device only — nothing is sent anywhere.</p>
+        <input class="name-input" id="name-input" type="text" placeholder="Your first name" autocomplete="off"
+          onkeydown="if(event.key==='Enter')startEntry()">
+        <br>
+        <button class="btn-start" onclick="startEntry()">Get started →</button>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('name-input')?.focus(), 50);
+}
+
+function startEntry() {
+  const val = document.getElementById('name-input')?.value?.trim();
+  if (!val) return;
+  studentName = val;
+  render();
+}
+
+function renderMarks(app) {
+  const earned = marks.reduce((a, v, i) => a + Math.min(parseInt(v)||0, QUESTIONS[i].max), 0);
+  const pct = Math.round(earned / TOTAL_MARKS * 100);
+  const filled = marks.filter(v => v !== '').length;
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <h1>Hi ${studentName} 👋 — enter your prelim marks</h1>
+        <p>Look at your marked paper and type in how many marks you got for each part.</p>
+      </div>
+      <div class="card-body">
+        <div class="section-label">Your marks — ${filled}/${QUESTIONS.length} parts entered</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${filled/QUESTIONS.length*100}%"></div></div>
+
+        <div class="questions-grid">
+          ${QUESTIONS.map((q, i) => {
+            const v = marks[i];
+            const isOver = v !== '' && parseInt(v) > q.max;
+            const desc = getSpecDesc(q.spec);
+            return `<div class="q-row">
+              <span class="q-label">${q.label}</span>
+              <div class="q-spec-cell">
+                <div style="display:flex;align-items:center;gap:0.35rem;">
+                  <span class="q-spec" id="spec-label-${i}">${q.spec}</span>
+                  <button onclick="toggleSpecEdit(${i})" title="Change spec mapping"
+                    style="background:none;border:none;cursor:pointer;padding:0.1rem;color:var(--ink-light);line-height:1;flex-shrink:0;"
+                    onmouseover="this.style.color='var(--subject)'" onmouseout="this.style.color='var(--ink-light)'">
+                    <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                </div>
+                <div id="spec-edit-${i}" style="display:none;margin-top:0.3rem;">
+                  <select onchange="changeSpec(${i},this.value)"
+                    style="font-size:0.72rem;font-family:var(--font);border:1.5px solid var(--subject);border-radius:var(--radius-sm);padding:0.2rem 0.4rem;color:var(--ink);background:white;width:100%;max-width:280px;">
+                    ${buildSpecOptions(q.spec)}
+                  </select>
+                </div>
+                ${desc ? `<span class="q-spec-desc" id="spec-desc-${i}">${desc}</span>` : `<span class="q-spec-desc" id="spec-desc-${i}"></span>`}
+              </div>
+              <div class="q-entry">
+                <input class="q-input${isOver?' over':''}" type="number" min="0" max="${q.max}"
+                  value="${v}" placeholder="—"
+                  oninput="updateMark(${i},this.value)"
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();focusNext(${i})}"
+                  id="q${i}">
+                <span class="q-max">/${q.max}</span>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <div class="totals-row">
+          <div>
+            <div class="total-score">${earned} / ${TOTAL_MARKS}</div>
+            <div class="total-pct">${pct}% overall</div>
+          </div>
+          <div style="text-align:right;font-size:0.78rem;color:var(--ink-light);">
+            ${pct >= 65 ? '✅ On track for a pass' : pct >= 50 ? '⚠️ Borderline — focus needed' : '🔴 Priority revision needed'}
+          </div>
+        </div>
+
+        <button class="btn-report" onclick="showReport()" ${filled < 5 ? 'disabled' : ''}>
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          See my revision plan
+        </button>
+        ${filled < 5 ? '<p style="text-align:center;font-size:0.72rem;color:var(--ink-light);margin-top:0.5rem;">Enter at least 5 marks to generate your plan</p>' : ''}
+      </div>
+    </div>`;
+
+  setTimeout(() => document.getElementById('q0')?.focus(), 50);
+}
+
+function updateMark(i, val) {
+  marks[i] = val;
+  // Live update totals without full re-render
+  const earned = marks.reduce((a, v, idx) => a + Math.min(parseInt(v)||0, QUESTIONS[idx].max), 0);
+  const pct = Math.round(earned / TOTAL_MARKS * 100);
+  const filled = marks.filter(v => v !== '').length;
+  const scoreEl = document.querySelector('.total-score');
+  const pctEl = document.querySelector('.total-pct');
+  const progEl = document.querySelector('.progress-bar-fill');
+  const sectionEl = document.querySelector('.section-label');
+  const btn = document.querySelector('.btn-report');
+  const hint = btn?.nextElementSibling;
+  if (scoreEl) scoreEl.textContent = `${earned} / ${TOTAL_MARKS}`;
+  if (pctEl) pctEl.textContent = `${pct}% overall`;
+  if (progEl) progEl.style.width = `${filled/QUESTIONS.length*100}%`;
+  if (sectionEl) sectionEl.textContent = `Your marks — ${filled}/${QUESTIONS.length} parts entered`;
+  if (btn) { btn.disabled = filled < 5; }
+  if (hint) hint.style.display = filled < 5 ? '' : 'none';
+  // Highlight over-max
+  const input = document.getElementById(`q${i}`);
+  if (input) {
+    const isOver = val !== '' && parseInt(val) > QUESTIONS[i].max;
+    input.classList.toggle('over', isOver);
+  }
+}
+
+function focusNext(i) {
+  const next = document.getElementById(`q${i+1}`);
+  if (next) next.focus();
+}
+
+function showReport() {
+  const app = document.getElementById('app');
+  const earned = marks.reduce((a, v, i) => a + Math.min(parseInt(v)||0, QUESTIONS[i].max), 0);
+  const pct = Math.round(earned / TOTAL_MARKS * 100);
+  const topicData = getTopicData();
+  const outcomeData = getOutcomeData();
+
+  const grade = pct >= 65 ? 'Pass' : pct >= 50 ? 'Borderline' : 'Below pass';
+  const badgeClass = pct >= 65 ? 'badge-pass' : pct >= 50 ? 'badge-border' : 'badge-below';
+
+  // Build accordion — only topics that appear in this test
+  const testedTopicKeys = [...new Set(QUESTIONS.map(q => q.spec.match(/^CS\s*\d+/i)?.[0]?.replace(/\s+/,'') || ''))];
+  const testedGroups = Object.entries(SPEC).filter(([k]) => testedTopicKeys.includes(k));
+
+  // Sort: priority (red) first, then amber, then green
+  const ranked = testedGroups.map(([gk, gd]) => {
+    const td = topicData[gk] || { earned:0, possible:0 };
+    const grpPct = td.possible ? Math.round(td.earned/td.possible*100) : 0;
+    return { gk, gd, td, grpPct, gc: gradeColor(grpPct) };
+  }).sort((a,b) => { const o={red:0,amber:1,green:2}; return o[a.gc]-o[b.gc]; });
+
+  const priority = ranked.filter(r=>r.gc==='red');
+  const developing = ranked.filter(r=>r.gc==='amber');
+  const secure = ranked.filter(r=>r.gc==='green');
+
+  let accordionHtml = '';
+  ranked.forEach(({ gk, gd, td, grpPct, gc }, idx) => {
+    const id = `acc${idx}`;
+    const chevId = `chev${idx}`;
+    const col = gc==='green'?'var(--green)':gc==='amber'?'var(--amber)':'var(--red)';
+    const status = gc==='green'?'Secure':gc==='amber'?'Developing':'Priority';
+
+    // Outcome rows for this group
+    const testedOutcomes = Object.entries(gd.outcomes).filter(([code]) => outcomeData[code]);
+    let subRows = '';
+    testedOutcomes.forEach(([code, desc]) => {
+      const od = outcomeData[code] || {earned:0,possible:0};
+      const sp = od.possible ? Math.round(od.earned/od.possible*100) : null;
+      const scol = sp===null?'var(--ink-light)':sp>=70?'var(--green)':sp>=50?'var(--amber)':'var(--red)';
+
+      // Past paper pills for this outcome
+      const normOc = normCode(code);
+      const pps = PAPER_BANK.filter(p => normCode(p.spec) === normOc);
+      const ppsByYear = {};
+      pps.forEach(p => { if (!ppsByYear[p.year]) ppsByYear[p.year] = []; ppsByYear[p.year].push(p); });
+
+      const ppHtml = Object.keys(ppsByYear).length ? `
+        <div class="pp-section">
+          <div class="pp-label">
+            <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--subject);fill:none;stroke-width:2;"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <span class="pp-label-text">Practice questions from past papers</span>
+          </div>
+          <div class="pp-pills">
+            ${Object.entries(ppsByYear).map(([yr, qs]) => `
+              <span class="pp-pill">
+                <a class="qp" href="${getPaperURL(yr)}" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                  ${yr} Paper ${qs.map(q=>q.ref).join(', ')}
+                </a>
+                <a class="ms" href="${getMSURL(yr)}" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                  Marking
+                </a>
+              </span>`).join('')}
+          </div>
+        </div>` : `<div class="pp-section"><span class="pp-none">No past paper questions mapped to this outcome yet</span></div>`;
+
+      subRows += `
+        <div class="outcome-row" style="background:${gc==='red'?'#fff8f8':gc==='amber'?'#fffdf0':'#f8fffe'}">
+          <div>
+            <div class="outcome-code">${code}</div>
+            <div class="outcome-desc">${desc}</div>
+          </div>
+          <div style="text-align:right;">
+            ${sp !== null ? `<div class="outcome-score" style="color:${scol}">${sp}%</div>
+            <div class="outcome-frac">${od.earned}/${od.possible}</div>` : ''}
+          </div>
+        </div>
+        ${ppHtml}`;
+    });
+
+    accordionHtml += `
+      <div class="acc-section">
+        <div class="acc-header" onclick="toggleAcc('${id}','${chevId}')">
+          <div class="acc-dot ${gc}"></div>
+          <div class="acc-title">
+            <div class="acc-title-top">
+              <span class="acc-code">${gk}</span>
+              <span class="acc-name">${gd.label}</span>
+            </div>
+            <div class="acc-bar-row"><div class="acc-bar-fill ${gc}" style="width:${grpPct}%"></div></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;margin-right:0.5rem;">
+            <div class="acc-pct ${gc}">${grpPct}%</div>
+            <span class="acc-status ${gc}">${status}</span>
+          </div>
+          <svg id="${chevId}" class="acc-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div id="${id}" class="acc-body">${subRows}</div>
+      </div>`;
+  });
+
+  // Topic bars data for chart
+  const topicBarsHtml = ranked.map(({ gk, gd, grpPct, gc }) => {
+    const col = gc==='green'?'var(--green)':gc==='amber'?'var(--amber)':'var(--red)';
+    return `<div class="topic-bar-row">
+      <span class="topic-bar-label" title="${gd.label}">${gd.label}</span>
+      <div class="topic-bar-track"><div class="topic-bar-fill" style="width:${grpPct}%;background:${col}"></div></div>
+      <span class="topic-bar-pct" style="color:${col}">${grpPct}%</span>
+    </div>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="result-banner">
+        <div>
+          <div class="result-name">${studentName}</div>
+          <div class="result-meta">Higher Engineering Science · Prelim</div>
+          <span class="grade-badge ${badgeClass}">${grade}</span>
+        </div>
+        <div>
+          <div class="result-pct">${pct}%</div>
+          <div class="result-marks">${earned} / ${TOTAL_MARKS} marks</div>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-cell">
+          <div class="summary-num" style="color:var(--red)">${priority.length}</div>
+          <div class="summary-label">Priority topics</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-num" style="color:var(--amber)">${developing.length}</div>
+          <div class="summary-label">Developing</div>
+        </div>
+        <div class="summary-cell">
+          <div class="summary-num" style="color:var(--green)">${secure.length}</div>
+          <div class="summary-label">Secure</div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-cell">
+          <div class="chart-title">Performance by topic</div>
+        <canvas id="radar-chart"></canvas>
+        </div>
+        <div class="chart-cell">
+          <div class="chart-title">Topic breakdown</div>
+          ${topicBarsHtml}
+        </div>
+      </div>
+
+      <div id="acc-instruction-bar" style="padding:0.75rem 1.25rem;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+        <span style="font-size:0.75rem;font-weight:600;color:var(--ink-mid);">Click any topic to see spec outcomes and past paper practice</span>
+        <div style="display:flex;gap:0.4rem;">
+          <button onclick="expandAll()" style="font-size:0.68rem;padding:0.22rem 0.6rem;border:1px solid var(--border-mid);border-radius:var(--radius-sm);background:white;cursor:pointer;font-family:var(--font);">Expand all</button>
+          <button onclick="collapseAll()" style="font-size:0.68rem;padding:0.22rem 0.6rem;border:1px solid var(--border-mid);border-radius:var(--radius-sm);background:white;cursor:pointer;font-family:var(--font);">Collapse all</button>
+        </div>
+      </div>
+
+      ${accordionHtml}
+
+      <div class="resources-footer">
+        <div>
+          <div class="section-label" style="margin-bottom:0.4rem;">SQA resources</div>
+          <div class="res-links">
+            ${AVAILABLE_YEARS.slice(0,1).map(yr => `
+              <a class="res-link" href="${getPaperURL(yr)}" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                ${yr} Question Paper
+              </a>
+              <a class="res-link dim" href="${getMSURL(yr)}" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M9 11l3 3L22 4"/></svg>
+                ${yr} Marking Instructions
+              </a>`).join('')}
+            <a class="res-link dim" href="https://www.sqa.org.uk/pastpapers/findpastpaper.htm?subject=Engineering%20Science&level=NH" target="_blank" rel="noopener">All past papers ↗</a>
+          </div>
+        </div>
+        <div class="btn-print-wrap">
+          <button class="btn-print" onclick="window.print()">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Print / Save PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-retake" onclick="goBack()">← Edit my marks</button>
+  `;
+
+  // Draw radar chart
+  setTimeout(() => {
+    const canvas = document.getElementById('radar-chart');
+    if (!canvas || !window.Chart) return;
+    if (radarChart) radarChart.destroy();
+    const labels = ranked.map(r => r.gd.label.split(' ').slice(0,2).join(' '));
+    const data = ranked.map(r => r.grpPct);
+    const bgs = ranked.map(r => r.gc==='green'?'rgba(26,122,66,0.15)':r.gc==='amber'?'rgba(180,83,9,0.15)':'rgba(197,48,48,0.15)');
+    const borders = ranked.map(r => r.gc==='green'?'#1a7a42':r.gc==='amber'?'#b45309':'#c53030');
+    canvas.style.maxHeight = '220px';
+    radarChart = new Chart(canvas, {
+      type:'radar',
+      data:{ labels, datasets:[{ data, backgroundColor:'rgba(26,122,66,0.1)', borderColor:'#1a7a42', pointBackgroundColor: borders, pointRadius:4, borderWidth:2 }] },
+      options:{ responsive:true, maintainAspectRatio:true, aspectRatio:1, scales:{ r:{ min:0, max:100, ticks:{ stepSize:25, font:{size:9}, color:'#8896a5' }, pointLabels:{ font:{size:9,family:"'Plus Jakarta Sans',sans-serif"}, color:'#4a5568' }, grid:{ color:'rgba(0,0,0,0.06)' }, angleLines:{ color:'rgba(0,0,0,0.08)' } } }, plugins:{ legend:{ display:false } } }
+    });
+  }, 100);
+}
+
+function toggleAcc(id, chevId) {
+  const body = document.getElementById(id);
+  const chev = document.getElementById(chevId);
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function expandAll() {
+  document.querySelectorAll('.acc-body').forEach(b => b.classList.add('open'));
+  document.querySelectorAll('.acc-chevron').forEach(c => c.style.transform = 'rotate(180deg)');
+}
+
+function collapseAll() {
+  document.querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.acc-chevron').forEach(c => c.style.transform = '');
+}
+
+function goBack() {
+  render();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
